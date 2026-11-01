@@ -1,0 +1,54 @@
+import requests
+import csv
+
+with open("f1_results.csv", "w", newline="", encoding="utf-8") as file:
+
+    writer = csv.writer(file)
+
+    writer.writerow([
+        "season",
+        "round",
+        "race",
+        "driver",
+        "constructor",
+        "grid",
+        "points",
+        "laps",
+        "position"
+    ])
+
+    for round_number in range(1, 25):
+
+        url = f"https://api.jolpi.ca/ergast/f1/2025/{round_number}/results.json"
+
+        response = requests.get(url)
+
+        if response.status_code != 200:
+            continue
+
+        data = response.json()
+
+        races = data["MRData"]["RaceTable"]["Races"]
+
+        if len(races) == 0:
+            continue
+
+        race = races[0]
+
+        print("Adding:", race["raceName"])
+
+        for result in race["Results"]:
+
+            writer.writerow([
+                race["season"],
+                race["round"],
+                race["raceName"],
+                result["Driver"]["givenName"] + " " + result["Driver"]["familyName"],
+                result["Constructor"]["name"],
+                result["grid"],
+                result["points"],
+                result["laps"],
+                result["position"]
+            ])
+
+print("Dataset created successfully!")
